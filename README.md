@@ -97,7 +97,7 @@ Usage
     $ url-preview-md.py ~/img http://developer.run/70
     [Markdown Url Preview](http://developer.run/70) Markdown Url Preview in text editor.
     ![](/home/dmi3/img/2023_09_01_developer.run_url-preview-md.png)
-    If you have OpenGraph.io api key, add it as last argument to try it if webpreview finds nothing useful
+    If you have raindrop.io api key, add it as last argument to try it if webpreview finds nothing useful
     $ url-preview-md.py ~/img http://developer.run/70 e2b0e47c-8a03-11ef-b1b2-13950b80fc62
 <hr/>
 

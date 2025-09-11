@@ -19,7 +19,7 @@
 #      [Markdown Url Preview](http://developer.run/70) Markdown Url Preview in text editor.
 #      ![](/home/dmi3/img/2023_09_01_developer.run_url-preview-md.png)
 #
-#      If you have OpenGraph.io api key, add it as last argument to try it if webpreview finds nothing useful
+#      If you have raindrop.io api key, add it as last argument to try it if webpreview finds nothing useful
 #      $ url-preview-md.py ~/img http://developer.run/70 e2b0e47c-8a03-11ef-b1b2-13950b80fc62
 
 
@@ -36,10 +36,11 @@ d = os.path.expanduser(sys.argv[1])
 os.makedirs(d, exist_ok = True)
 
 url = sys.argv[2]
-opengraph_api_key = sys.argv[3] if len(sys.argv) > 3 else None
+raindrop_api_key = sys.argv[3] if len(sys.argv) > 3 else None
 
-headers = {"Accept": "*/*", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"}
+headers = {"Accept": "*/*", "Origin": "https://google.com", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"}
 exclusions = ["amazon.", "x.com", "twitter.com", "youtube.com"]
+timeout = 3
 
 if url.startswith("file://"):
     file_path = url[7:]
@@ -51,32 +52,37 @@ if url.startswith("file://"):
 
 p = WebPreview(url, None, None, None)
 
+if all(x not in url for x in exclusions):
+    try:
+        p = webpreview(url, headers=headers, timeout=timeout)
+
+        # If link is image - use it
+        if p.title == None and p.description == None and p.image == None:
+            h = requests.head(url, allow_redirects=True, headers = headers, timeout=timeout)
+
+            content_type = h.headers.get('content-type')
+            if content_type != None and content_type.startswith('image/'):
+                p.image = url
+    except:
+        print("Unable to fetch url:" + url)
+
+# if failed or url was excluded - try external service
 try:
-    if all(x not in url for x in exclusions):
-        p = webpreview(url, headers=headers)
-except:
-    print("Unable to fetch url:" + url)
-    exit()
-
-# If link is image - use it
-if p.title == None and p.description == None and p.image == None:
-    h = requests.head(url, allow_redirects=True, headers = headers)
-
-    content_type = h.headers.get('content-type')
-    if content_type != None and content_type.startswith('image/'):
-        p.image = url
-
-try:
-    if opengraph_api_key != None and p.image == None:
-        # https://www.linkpreview.net might be an alternative
-        response = requests.get('https://opengraph.io/api/1.1/site/%s?app_id=%s' % (quote_plus(url), opengraph_api_key))
+    if raindrop_api_key != None and p.image == None:
+        response = requests.get(
+            f"https://api.raindrop.io/rest/v1/import/url/parse?url={url}",
+            headers={"Authorization": f"Bearer {raindrop_api_key}"},
+            timeout=timeout
+        )
         data = response.json()
 
-        img = data['hybridGraph'].get('image')
-        if img == None:
-            img = data['hybridGraph'].get('imageSecureUrl')
+        item = data['item']
+        # proxy
+        img = "https://cors-anywhere.com/" + item.get('cover')
+        title = item.get('title')
+        description = item.get('excerpt')[:400]
 
-        p = WebPreview(url, data['hybridGraph'].get('title'), data['hybridGraph'].get('description')[:400], img)
+        p = WebPreview(url, title, description, img)
 except:
     print("Unable to fetch url:" + url)
     exit()
@@ -87,7 +93,7 @@ if (p.image):
         u = p.image
         if not u.startswith("http"):
             u = urljoin(url, p.image)
-        r = requests.get(u, allow_redirects=True, headers = headers)
+        r = requests.get(u, allow_redirects=True, headers = headers, timeout=timeout)
         a = urlparse(url)
         i = urlparse(u)
         filename = "_".join([datetime.now().strftime("%Y_%m_%d"), a.netloc, os.path.basename(i.path)])
@@ -116,7 +122,6 @@ if (p.description):
 a = "<%s>" % url
 if (p.title):
     a = "[%s](%s)" % (p.title, url)
-
 
 print(a + descr + image)
 

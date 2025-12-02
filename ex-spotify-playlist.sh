@@ -18,7 +18,7 @@
   
 #  Requirements
 #  ------------
-#      sudo apt-get install jq
+#      sudo apt-get install libxml2-utils
 
 #  Usage
 #  ------------
@@ -29,4 +29,6 @@
 #  5. Paste into file and save
 #  6. `cat /path/to/file | ex-spotify-playlist.sh`
 
-cat | xargs -n 1 curl -s | grep "Spotify.Entity" | grep -Po "\{.*\}" | jq -r '(.name + " - " + .artists[0].name)'
+while IFS= read -r url; do
+  curl -s "$url" | xmllint --html --recover --xpath "concat(string(//meta[@name='music:musician_description']/@content), ' - ', string(//meta[@property='og:title']/@content))" - 2>/dev/null
+done

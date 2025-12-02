@@ -55,6 +55,8 @@ Requirements
 Usage
 -----
     volume (up|down|mute)
+ # $volume without trailing %
+ kbecho.py p ${volume%?}
 <hr/>
 
 # [vlc-now.sh](https://github.com/dmi3/bin/blob/master/vlc-now.sh)
@@ -414,7 +416,6 @@ Usage
 * Put some nice pictures in ~/wallpapers/
 * Call this script by cron, on login or unlock
 * If you want fixed background color - put one in ~/wallpapers/bg_color
-* You may want to change `--set-centered` to `--set-auto` depending on how picture should be scaled.
 <hr/>
 
 # [print-numbers.py](https://github.com/dmi3/bin/blob/master/print-numbers.py)
@@ -675,7 +676,7 @@ To "Track - Artist" list:
 
 Requirements
 ------------
-    sudo apt-get install jq
+    sudo apt-get install libxml2-utils
 
 Usage
 ------------

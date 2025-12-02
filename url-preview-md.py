@@ -24,6 +24,7 @@
 
 
 import os
+import re
 import sys
 import shutil
 import requests
@@ -77,8 +78,8 @@ try:
         data = response.json()
 
         item = data['item']
-        # proxy
-        img = "https://cors-anywhere.com/" + item.get('cover')
+
+        img = item.get('cover')
         title = item.get('title')
         description = item.get('excerpt')[:400]
 
@@ -97,6 +98,7 @@ if (p.image):
         a = urlparse(url)
         i = urlparse(u)
         filename = "_".join([datetime.now().strftime("%Y_%m_%d"), a.netloc, os.path.basename(i.path)])
+        filename = re.sub(r"[^A-Za-z0-9._-]+", "", filename)
         filename, ext = os.path.splitext(filename.lstrip("/"))
         if ext == "":
             ext = ".png"

@@ -200,6 +200,18 @@ Usage
 * Select any text. Press hotkey.
 <hr/>
 
+# [top10tracks.sh](https://github.com/dmi3/bin/blob/master/top10tracks.sh)
+
+
+Decription
+----------
+Prints top 10 track of artist
+
+Usage
+-----
+top10tracks.sh Mick Gordon
+<hr/>
+
 # [tomatych.py](https://github.com/dmi3/bin/blob/master/tomatych.py)
 
 <img src="http://developer.run/pic/tomatych.png"/>
